@@ -4,7 +4,7 @@ import React from 'react';
 const Button = ({ onClick, children }) => {
   return (
     <button
-      className="bg-purple-700 hover:bg-purple-800 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+      className="bg-purple-900 hover:bg-purple-800 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
       onClick={onClick}
     >
       {children}
