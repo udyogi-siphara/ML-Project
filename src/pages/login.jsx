@@ -1,6 +1,5 @@
-// pages/login.js
 import React, { useState } from 'react';
-import TextField from '../components/Textfiled'
+import TextField from '../components/Textfiled'; // Correct the import statement
 import Button from '../components/Button';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -8,9 +7,16 @@ import { useRouter } from 'next/router';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const router = useRouter();
 
   const handleLogin = () => {
+    // Basic validations
+    if (!email.trim() || !password.trim()) {
+      setError('Please enter both email and password.');
+      return;
+    }
+
     // Simulate login logic
     console.log('Logging in with:', email, password);
 
@@ -25,6 +31,7 @@ const Login = () => {
         <h1 className="text-2xl font-bold text-purple-900 mb-6">Login</h1>
         <TextField label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
         <TextField label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        {error && <p className="text-red-500">{error}</p>}
         <Button onClick={handleLogin}>Login</Button>
         <p className="mt-4 text-gray-600">
           Don't have an account?{' '}
