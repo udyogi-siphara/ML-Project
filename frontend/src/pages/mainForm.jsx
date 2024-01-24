@@ -4,7 +4,7 @@ import TextField from '../components/Textfiled';
 import Button from '../components/Button';
 import { useRouter } from 'next/router';
 
-const categories = ['Bills', 'Groceries', 'Shopping', 'Others'];
+const categories = ['Bills', 'Groceries', 'Shopping', 'Electronic'];
 
 const defaultRecommendations = [
   { category: 'Groceries', item: 'Lunu', cost: 500 },
