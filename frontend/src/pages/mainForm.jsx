@@ -6,95 +6,246 @@ import { useRouter } from 'next/router';
 
 const categories = ['Bills', 'Groceries', 'Shopping', 'Electronic'];
 
-const defaultRecommendations = [
-  { category: 'Groceries', item: 'Lunu', cost: 500 },
-  { category: 'Shopping', item: 'Watch', cost: 1500 },
-];
+// const defaultRecommendations = [
+//   { category: 'Groceries', item: 'Lunu', cost: 500 },
+//   { category: 'Shopping', item: 'Watch', cost: 1500 },
+// ];
 
 const MainForm = () => {
   const router = useRouter();
-  const userSalary = typeof window !== 'undefined' ? localStorage.getItem('userSalary') || 0 : 0;
+  // const userSalary = typeof window !== 'undefined' ? localStorage.getItem('userSalary') || 0 : 0;
+  // const [selectedCategory, setSelectedCategory] = useState('');
+  // const [item, setItem] = useState('');
+  // const [cost, setCost] = useState('');
+  // const [expenses, setExpenses] = useState([]);
+   //const [budgetSummary, setBudgetSummary] = useState(0);
+
+  // const [expenses, setExpenses] = useState([]);
+  // const [selectedCategory, setSelectedCategory] = useState('');
+  // const [item, setItem] = useState('');
+  // const [cost, setCost] = useState('');
+
+  // const fetchExpenses = async () => {
+  //   try {
+  //     const response = await fetch('/api/expenses');
+  //     const data = await response.json();
+  //     setExpenses(data.expenses);
+  //   } catch (error) {
+  //     console.error('Error fetching expenses:', error);
+  //   }
+  // };
+
+  // const handleAddExpense = async () => {
+  //   try {
+  //     const response = await fetch('/api/expenses', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ category: selectedCategory, item, cost }),
+  //     });
+
+  //     const data = await response.json();
+
+  //     if (data.newExpense) {
+  //       const confirmed = window.confirm(
+  //         `Consider replacing ${item} at Rs.${cost} with ${data.newExpense.item} at Rs.${data.newExpense.cost}?`
+  //       );
+
+  //       if (confirmed) {
+  //         setExpenses([...expenses, data.newExpense]);
+  //       }
+  //     } else {
+  //       setExpenses([...expenses, data.newExpense]);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error adding expense:', error);
+  //   }
+
+  //   // Clear form fields
+  //   setSelectedCategory('');
+  //   setItem('');
+  //   setCost('');
+  // };
+
+  // useEffect(() => {
+  //   fetchExpenses();
+  // }, []);
+
+
+  const [userSalary, setUserSalary] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [item, setItem] = useState('');
   const [cost, setCost] = useState('');
   const [expenses, setExpenses] = useState([]);
-  const [budgetSummary, setBudgetSummary] = useState({ remainingSalary: userSalary, expenses: [] });
+  const [remainingSalary, setRemainingSalary] = useState(0);
 
-  const checkForAlternatives = (newExpense) => {
-    const alternative = defaultRecommendations.find(
-      (recommendation) =>
-        recommendation.category === newExpense.category &&
-        recommendation.item.toLowerCase() === newExpense.item.toLowerCase() &&
-        recommendation.cost < newExpense.cost
-    );
-
-    if (alternative) {
-      const replace = window.confirm(
-        `Consider replacing ${newExpense.item} at $${newExpense.cost} with ${alternative.item} at $${alternative.cost}?`
-      );
-
-      if (replace) {
-        return alternative;
-      }
-    }
-
-    return null;
-  };
-
+  // Fetch user salary and expenses on component mount
   useEffect(() => {
-    const totalExpenses = expenses.reduce((sum, expense) => sum + expense.cost, 0);
-    const remainingSalary = userSalary - totalExpenses;
+    const fetchData = async () => {
+      try {
+        // Fetch user salary
+        const salaryResponse = await fetch('http://localhost:5000/api/user_salary');
+        const salaryData = await salaryResponse.json();
+        setUserSalary(salaryData.userSalary);
 
-    if (remainingSalary < 0) {
-      setExpenses([...expenses, ...defaultRecommendations]);
-      setBudgetSummary({ remainingSalary: 0, expenses: [...expenses, ...defaultRecommendations] });
+        // Fetch expenses
+        const expensesResponse = await fetch('http://127.0.0.1:5000/add_expense');
+        const expensesData = await expensesResponse.json();
+        setExpenses(expensesData.expenses);
+        setRemainingSalary(expensesData.remainingSalary);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // const handleAddExpense = async () => {
+  //   try {
+  //     const response = await fetch('http://127.0.0.1:5000/add_expense', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ category: selectedCategory, item, cost: parseFloat(cost) }),
+  //     });
+
+  //     if (response.ok) {
+  //       const responseData = await response.json();
+
+  //       if (responseData.newExpense && responseData.newExpense.recommended) {
+  //         const recommendation = responseData.newExpense;
+  //         const replace = window.confirm(
+  //           `Consider replacing ${item} at $${cost} with ${recommendation.item} at $${recommendation.cost}?`
+  //         );
+
+  //         if (replace) {
+  //           setExpenses([...expenses, recommendation]);
+  //           setRemainingSalary(responseData.remainingSalary);
+  //         }
+  //       } else {
+  //         setExpenses([...expenses, responseData.newExpense]);
+  //         setRemainingSalary(responseData.remainingSalary);
+  //       }
+
+  //       setSelectedCategory('');
+  //       setItem('');
+  //       setCost('');
+  //     } else {
+  //       console.error('Failed to add expense');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error:', error);
+  //   }
+  // };
+
+
+
+  const handleAddExpense = async () => {
+  try {
+    const response = await fetch('http://127.0.0.1:5000/add_expense', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      
+
+      body: JSON.stringify({ category: selectedCategory, item, cost: parseFloat(cost) }),
+    });
+    console.log('Request Data:', { category: selectedCategory, item, cost: parseFloat(cost) })
+    console.log('Response:', response); // Add this line
+
+    if (response.ok) {
+      const responseData = await response.json();
+      console.log('Response Data:', responseData); // Add this line
+
+      // Rest of your code
     } else {
-      setBudgetSummary({ remainingSalary, expenses });
+      console.error('Failed to add expense');
     }
-  }, [expenses, userSalary]);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
 
-  const handleAddExpense = () => {
-    if (selectedCategory.trim() === '' || item.trim() === '' || isNaN(cost) || cost <= 0) {
-      alert('Please enter a valid category, item, and cost.');
-      return;
-    }
 
-    const newExpense = { category: selectedCategory, item, cost: parseFloat(cost) };
-    const alternative = checkForAlternatives(newExpense);
+  // const checkForAlternatives = (newExpense) => {
+  //   const alternative = defaultRecommendations.find(
+  //     (recommendation) =>
+  //       recommendation.category === newExpense.category &&
+  //       recommendation.item.toLowerCase() === newExpense.item.toLowerCase() &&
+  //       recommendation.cost < newExpense.cost
+  //   );
 
-    if (alternative) {
-      setExpenses([...expenses, alternative]);
-      const remainingSalary = userSalary - expenses.reduce((sum, expense) => sum + expense.cost, 0) - alternative.cost;
-      setBudgetSummary({ remainingSalary, expenses: [...expenses, alternative] });
-    } else {
-      setExpenses([...expenses, newExpense]);
-      const remainingSalary = userSalary - expenses.reduce((sum, expense) => sum + expense.cost, 0) - newExpense.cost;
-      setBudgetSummary({ remainingSalary, expenses: [...expenses, newExpense] });
-    }
+  //   if (alternative) {
+  //     const replace = window.confirm(
+  //       `Consider replacing ${newExpense.item} at $${newExpense.cost} with ${alternative.item} at $${alternative.cost}?`
+  //     );
 
-    setSelectedCategory('');
-    setItem('');
-    setCost('');
-  };
+  //     if (replace) {
+  //       return alternative;
+  //     }
+  //   }
 
-  const handleEditRecommendation = (index) => {
-    const editedExpense = { ...expenses[index] };
-    const editedCost = parseFloat(prompt(`Edit cost for ${editedExpense.item}:`, editedExpense.cost));
+  //   return null;
+  // };
 
-    if (!isNaN(editedCost) && editedCost > 0) {
-      editedExpense.cost = editedCost;
+  // useEffect(() => {
+  //   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.cost, 0);
+  //   const remainingSalary = userSalary - totalExpenses;
 
-      const updatedExpenses = [...expenses];
-      updatedExpenses[index] = editedExpense;
+  //   if (remainingSalary < 0) {
+  //     setExpenses([...expenses, ...defaultRecommendations]);
+  //     setBudgetSummary({ remainingSalary: 0, expenses: [...expenses, ...defaultRecommendations] });
+  //   } else {
+  //     setBudgetSummary({ remainingSalary, expenses });
+  //   }
+  // }, [expenses, userSalary]);
 
-      setExpenses(updatedExpenses);
+  // const handleAddExpense = () => {
+  //   if (selectedCategory.trim() === '' || item.trim() === '' || isNaN(cost) || cost <= 0) {
+  //     alert('Please enter a valid category, item, and cost.');
+  //     return;
+  //   }
 
-      const remainingSalary = userSalary - updatedExpenses.reduce((sum, expense) => sum + expense.cost, 0);
-      setBudgetSummary({ remainingSalary, expenses: updatedExpenses });
-    } else {
-      alert('Please enter a valid cost.');
-    }
-  };
+  //   const newExpense = { category: selectedCategory, item, cost: parseFloat(cost) };
+  //   const alternative = checkForAlternatives(newExpense);
+
+  //   if (alternative) {
+  //     setExpenses([...expenses, alternative]);
+  //     const remainingSalary = userSalary - expenses.reduce((sum, expense) => sum + expense.cost, 0) - alternative.cost;
+  //     setBudgetSummary({ remainingSalary, expenses: [...expenses, alternative] });
+  //   } else {
+  //     setExpenses([...expenses, newExpense]);
+  //     const remainingSalary = userSalary - expenses.reduce((sum, expense) => sum + expense.cost, 0) - newExpense.cost;
+  //     setBudgetSummary({ remainingSalary, expenses: [...expenses, newExpense] });
+  //   }
+
+  //   setSelectedCategory('');
+  //   setItem('');
+  //   setCost('');
+  // };
+
+  // const handleEditRecommendation = (index) => {
+  //   const editedExpense = { ...expenses[index] };
+  //   const editedCost = parseFloat(prompt(`Edit cost for ${editedExpense.item}:`, editedExpense.cost));
+
+  //   if (!isNaN(editedCost) && editedCost > 0) {
+  //     editedExpense.cost = editedCost;
+
+  //     const updatedExpenses = [...expenses];
+  //     updatedExpenses[index] = editedExpense;
+
+  //     setExpenses(updatedExpenses);
+
+  //     const remainingSalary = userSalary - updatedExpenses.reduce((sum, expense) => sum + expense.cost, 0);
+  //     setBudgetSummary({ remainingSalary, expenses: updatedExpenses });
+  //   } else {
+  //     alert('Please enter a valid cost.');
+  //   }
+  // };
 
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
@@ -166,13 +317,16 @@ const MainForm = () => {
             <div className="mt-8">
               <h2 className="text-lg font-bold text-purple-700 mb-4">Budget Summary:</h2>
               <ul>
-                {budgetSummary.expenses.map((expense, index) => (
+                {/* {budgetSummary.expenses.map((expense, index) => (
                   <li key={index}>
                     <strong>{expense.category}</strong> - {expense.item}: Rs. {expense.cost}
                   </li>
-                ))}
+                ))} */}
+                <li>
+                   5000 
+                </li>
               </ul>
-              <p>Remaining Salary: Rs. {parseFloat(budgetSummary.remainingSalary).toFixed(2)}</p>
+              {/* <p>Remaining Salary: Rs. {parseFloat(budgetSummary.remainingSalary).toFixed(2)}</p> */}
             </div>
           </div>
         </div>
