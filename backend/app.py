@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS  # Import the CORS extension
 import pandas as pd
 
+from expense_model import find_lowest_price
+
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
@@ -121,10 +123,17 @@ expenses = []  # Placeholder for storing expenses, replace with your database or
 data = pd.read_csv('dataset.csv')
 print(data.columns)
 
+class Item:
+    category:str
+    cost:int
+    item: str
+
 # Helper function to get the lowest cost for a given category and item
-def get_lowest_price(category, item):
-    matching_prices = data[(data['category'] == category) & (data['Name'] == item)]['Price']
-    return matching_prices.min() if not matching_prices.empty else None
+# def get_lowest_price(category, item):
+#     matching_prices = data[(data['category'] == category) & (data['Name'] == item)]['Price']
+#     return matching_prices.min() if not matching_prices.empty else None
+
+
 
 @app.route('/add_expense', methods=['GET', 'POST'])
 def handle_expenses():
@@ -141,23 +150,28 @@ def handle_expenses():
             print('Received data:', data)
             print('Processed expense successfully')
             category = data.get('category')
-            item = data.get('Name')
-            cost = data.get('Price')
+            item = data.get('item')
+            cost = data.get('cost')
 
-            if not (category and item and isinstance(cost, (int, float)) and cost > 0):
-                return jsonify({'error': 'Invalid request data'}), 400
+            # if not (category and item):
+            #     return jsonify({'error': 'Invalid request data'}), 400
 
             # Check for alternative recommendation
-            lowest_price = get_lowest_price(category, item)
+            lowest_price = find_lowest_price(category, item)
 
-            if lowest_price and cost > lowest_price:
-                alternative = {'category': category, 'Name': item, 'Price': lowest_price}
-                return jsonify({'newExpense': alternative, 'recommended': True}), 200
+            if cost < int(lowest_price['Price']):
+            #     alternative = {'category': category, 'Name': item, 'Price': lowest_price}
+            #     print(alternative)
+            #     print("alt======")
+            #     return jsonify({'newExpense': alternative, 'recommended': True}), 200
+                return jsonify({'cost': cost,'item': item,'category': category, 'recommended': False}), 200
+
             else:
-                # Replace with logic to add the new expense to your backend
-                new_expense = {'category': category, 'Name': item, 'Price': cost}
-                expenses.append(new_expense)
-                return jsonify({'newExpense': new_expense, 'recommended': False}), 200
+                
+            #     new_expense = {'category': category, 'Name': item, 'Price': cost}
+            #     print(new_expense)
+            #     expenses.append(new_expense)
+                return jsonify({'cost': lowest_price['Price'],'item': lowest_price['Name'],'category': lowest_price['category'], 'recommended': True}), 200
         except Exception as e:
             print('Error processing expense:', str(e))  # Add this line
             return jsonify({'error': 'Failed to add expense'}), 500  # Return a 500 status code

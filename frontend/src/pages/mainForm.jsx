@@ -79,6 +79,9 @@ const MainForm = () => {
   const [cost, setCost] = useState('');
   const [expenses, setExpenses] = useState([]);
   const [remainingSalary, setRemainingSalary] = useState(0);
+  const [lowestExpenses,setLowestExpenses] = useState(null);
+  const [lowestAllExpenses,setLowestAllExpenses] = useState([]);
+  const [allCost,setAllCost] = useState(0);
 
   // Fetch user salary and expenses on component mount
   useEffect(() => {
@@ -160,10 +163,21 @@ const MainForm = () => {
     if (response.ok) {
       const responseData = await response.json();
       console.log('Response Data:', responseData); // Add this line
-
+      alert('Category : '+responseData['category']+'\nName : '+responseData['item']+'\nCost : '+responseData['cost'])
       // Rest of your code
+      setLowestExpenses( {
+        cost:responseData['cost'],
+        item:responseData['item'],
+        category:responseData['category'],
+      })
+      setLowestAllExpenses( [...lowestAllExpenses,{
+        cost:responseData['cost'],
+        item:responseData['item'],
+        category:responseData['category'],
+      }])
+      setAllCost(allCost+responseData['cost'])
     } else {
-      console.error('Failed to add expense');
+      alert('Item Not Found..!');
     }
   } catch (error) {
     console.error('Error:', error);
@@ -260,7 +274,7 @@ const MainForm = () => {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-xl font-bold">Budget Tracker</h1>
-            <p>Salary = Rs. {userSalary}</p>
+            <p>Salary = Rs. {localStorage.getItem('userSalary')}</p>
           </div>
           <Button onClick={handleLogout}>Logout</Button>
         </div>
@@ -292,7 +306,7 @@ const MainForm = () => {
             <Button onClick={handleAddExpense}>Add Expense</Button>
 
             <div className="mt-8">
-              <h2 className="text-lg font-bold text-purple-700 mb-4">Your Expenses:</h2>
+              <h2 className="text-lg font-bold text-purple-700 mb-4">Your Expenses: {lowestExpenses? lowestExpenses.cost:""} </h2>
               {expenses.map((expense, index) => (
                 <div key={index} className="mb-2 text-md font-semibold">
                   {expense.category} = {expense.item}: Rs.{expense.cost}{' '}
@@ -315,19 +329,17 @@ const MainForm = () => {
 
           <div className="w-1/4">
             <div className="mt-8">
-              <h2 className="text-lg font-bold text-purple-700 mb-4">Budget Summary:</h2>
-              <ul>
-                {/* {budgetSummary.expenses.map((expense, index) => (
-                  <li key={index}>
-                    <strong>{expense.category}</strong> - {expense.item}: Rs. {expense.cost}
-                  </li>
-                ))} */}
+              <h2 className="text-lg font-bold text-purple-700 mb-4">Budget Summary: </h2>
+             {lowestExpenses!=null && <><ul>
+              {lowestAllExpenses.map((data)=>(
                 <li>
-                   5000 
-                </li>
+                    <strong>{data.category}</strong> - {data.item}: Rs. {data.cost}
+                  </li>
+              ))}
+                  
               </ul>
-              {/* <p>Remaining Salary: Rs. {parseFloat(budgetSummary.remainingSalary).toFixed(2)}</p> */}
-            </div>
+              <p>Remaining Salary: Rs. {parseFloat(localStorage.getItem('userSalary')-allCost).toFixed(2)}</p>
+              </>} </div>
           </div>
         </div>
       </div>
