@@ -11,9 +11,11 @@ const Login = () => {
 
 
   const handleLogin = async () => {
-    if (email.length === 0) {
-      alert("Email has left blank!");
-    } else if (password.length === 0) {
+    if (email.trim().length === 0) {
+      alert("Email has been left blank!");
+  } else if (!/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/.test(email)) {
+      alert("Invalid email format!");
+  } else if (password.length === 0) {
       alert("Password has left blank!");
     } else {
       try {

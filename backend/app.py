@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS  # Import the CORS extension
 import pandas as pd
-
+from pymongo import MongoClient
 from expense_model import find_lowest_price
 
 app = Flask(__name__)
@@ -22,46 +22,92 @@ default_recommendations = [
 def get_data():
     return '<p>Hello world</p>'
 
-@app.route('/login', methods=['POST'])
-def login():
-    try:
-        data = request.json
-        email = data.get('email')
-        password = data.get('password')
 
-        if not email or not password:
-            raise ValueError("Email and password are required")
+# app = Flask(__name__)
+client = MongoClient('localhost', 27017)
+db = client['expense_tracker']
+users_collection = db['users']
 
-        user = next((user for user in users if user['email'] == email and user['password'] == password), None)
+class User:
+    def __init__(self, collection):
+        self.collection = collection
 
+    def signup(self, username, password):
+        if self.collection.find_one({'username': username}):
+            return False, 'Username already exists'
+        self.collection.insert_one({'username': username, 'password': password})
+        return True, 'User registered successfully'
+
+    def login(self, username, password):
+        user = self.collection.find_one({'username': username, 'password': password})
         if user:
-            return jsonify({'success': True, 'message': 'Login successful'})
+            return True, 'Login successful'
         else:
-            return jsonify({'success': False, 'message': 'Invalid credentials'})
+            return False, 'Invalid username or password'
 
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)})
-    
+user_model = User(users_collection)
 
 @app.route('/signup', methods=['POST'])
 def signup():
-    try:
-        data = request.get_json()
-        email = data.get('email')
-        password = data.get('password')
+    user_data = request.get_json()
+    username = user_data['email']
+    password = user_data['password']
+    
+    success, message = user_model.signup(username, password)
+    status_code = 201 if success else 400
+    return jsonify({'message': message}), status_code
 
-        if not email or not password:
-            raise ValueError("Email and password are required")
+@app.route('/login', methods=['POST'])
+def login():
+    user_data = request.get_json()
+    username = user_data['email']
+    password = user_data['password']
+    
+    success, message = user_model.login(username, password)
+    status_code = 200 if success else 401
+    return jsonify({'message': message}), status_code
 
-        if any(user['email'] == email for user in users):
-            return jsonify({'success': False, 'message': 'Email already registered'})
 
-        users.append({'email': email, 'password': password})
+# @app.route('/login', methods=['POST'])
+# def login():
+#     try:
+#         data = request.json
+#         email = data.get('email')
+#         password = data.get('password')
 
-        return jsonify({'success': True, 'message': 'Signup successful'})
+#         if not email or not password:
+#             raise ValueError("Email and password are required")
 
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)})
+#         user = next((user for user in users if user['email'] == email and user['password'] == password), None)
+
+#         if user:
+#             return jsonify({'success': True, 'message': 'Login successful'})
+#         else:
+#             return jsonify({'success': False, 'message': 'Invalid credentials'})
+
+#     except Exception as e:
+#         return jsonify({'success': False, 'message': str(e)})
+    
+
+# @app.route('/signup', methods=['POST'])
+# def signup():
+#     try:
+#         data = request.get_json()
+#         email = data.get('email')
+#         password = data.get('password')
+
+#         if not email or not password:
+#             raise ValueError("Email and password are required")
+
+#         if any(user['email'] == email for user in users):
+#             return jsonify({'success': False, 'message': 'Email already registered'})
+
+#         users.append({'email': email, 'password': password})
+
+#         return jsonify({'success': True, 'message': 'Signup successful'})
+
+#     except Exception as e:
+#         return jsonify({'success': False, 'message': str(e)})
 
 
 # default_recommendations = [
@@ -109,7 +155,7 @@ def signup():
 #     else:
 #         return jsonify({'error': 'Method not allowed'}), 405
     
-    expenses = []  # Placeholder for storing expenses, replace with your database or storage solution
+    # expenses = []  # Placeholder for storing expenses, replace with your database or storage solution
 
 # Load data from CSV file using pandas
 
@@ -117,16 +163,16 @@ def signup():
 
 
 
-expenses = []  # Placeholder for storing expenses, replace with your database or storage solution
+# expenses = []  # Placeholder for storing expenses, replace with your database or storage solution
 
-# Load data from CSV file using pandas
-data = pd.read_csv('dataset.csv')
-print(data.columns)
+# # Load data from CSV file using pandas
+# data = pd.read_csv('dataset.csv')
+# print(data.columns)
 
-class Item:
-    category:str
-    cost:int
-    item: str
+# class Item:
+#     category:str
+#     cost:int
+#     item: str
 
 # Helper function to get the lowest cost for a given category and item
 # def get_lowest_price(category, item):

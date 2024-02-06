@@ -10,6 +10,10 @@ const Signup = () => {
   const router = useRouter();
 
   const handleSignup = async () => {
+    if (!/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/.test(email)) {
+      alert("Invalid email format!");
+      return;
+    } 
     try {
       const response = await fetch('http://127.0.0.1:5000/signup', {
         method: 'POST',
