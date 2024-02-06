@@ -70,24 +70,12 @@ def handle_expenses():
             item = data.get('item')
             cost = data.get('cost')
 
-            # if not (category and item):
-            #     return jsonify({'error': 'Invalid request data'}), 400
-
-            # Check for alternative recommendation
             lowest_price = find_lowest_price(category, item)
 
             if cost < int(lowest_price['Price']):
-            #     alternative = {'category': category, 'Name': item, 'Price': lowest_price}
-            #     print(alternative)
-            #     print("alt======")
-            #     return jsonify({'newExpense': alternative, 'recommended': True}), 200
                 return jsonify({'cost': cost,'item': item,'category': category, 'recommended': False}), 200
 
             else:
-                
-            #     new_expense = {'category': category, 'Name': item, 'Price': cost}
-            #     print(new_expense)
-            #     expenses.append(new_expense)
                 return jsonify({'cost': lowest_price['Price'],'item': lowest_price['Name'],'category': lowest_price['category'], 'recommended': True}), 200
         except Exception as e:
             print('Error processing expense:', str(e))  # Add this line

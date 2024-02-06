@@ -6,73 +6,8 @@ import { useRouter } from 'next/router';
 
 const categories = ['Bills', 'Groceries', 'Shopping', 'Electronic'];
 
-// const defaultRecommendations = [
-//   { category: 'Groceries', item: 'Lunu', cost: 500 },
-//   { category: 'Shopping', item: 'Watch', cost: 1500 },
-// ];
-
 const MainForm = () => {
   const router = useRouter();
-  // const userSalary = typeof window !== 'undefined' ? localStorage.getItem('userSalary') || 0 : 0;
-  // const [selectedCategory, setSelectedCategory] = useState('');
-  // const [item, setItem] = useState('');
-  // const [cost, setCost] = useState('');
-  // const [expenses, setExpenses] = useState([]);
-   //const [budgetSummary, setBudgetSummary] = useState(0);
-
-  // const [expenses, setExpenses] = useState([]);
-  // const [selectedCategory, setSelectedCategory] = useState('');
-  // const [item, setItem] = useState('');
-  // const [cost, setCost] = useState('');
-
-  // const fetchExpenses = async () => {
-  //   try {
-  //     const response = await fetch('/api/expenses');
-  //     const data = await response.json();
-  //     setExpenses(data.expenses);
-  //   } catch (error) {
-  //     console.error('Error fetching expenses:', error);
-  //   }
-  // };
-
-  // const handleAddExpense = async () => {
-  //   try {
-  //     const response = await fetch('/api/expenses', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({ category: selectedCategory, item, cost }),
-  //     });
-
-  //     const data = await response.json();
-
-  //     if (data.newExpense) {
-  //       const confirmed = window.confirm(
-  //         `Consider replacing ${item} at Rs.${cost} with ${data.newExpense.item} at Rs.${data.newExpense.cost}?`
-  //       );
-
-  //       if (confirmed) {
-  //         setExpenses([...expenses, data.newExpense]);
-  //       }
-  //     } else {
-  //       setExpenses([...expenses, data.newExpense]);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error adding expense:', error);
-  //   }
-
-  //   // Clear form fields
-  //   setSelectedCategory('');
-  //   setItem('');
-  //   setCost('');
-  // };
-
-  // useEffect(() => {
-  //   fetchExpenses();
-  // }, []);
-
-
   const [userSalary, setUserSalary] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [item, setItem] = useState('');
@@ -105,48 +40,7 @@ const MainForm = () => {
     fetchData();
   }, []);
 
-  // const handleAddExpense = async () => {
-  //   try {
-  //     const response = await fetch('http://127.0.0.1:5000/add_expense', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({ category: selectedCategory, item, cost: parseFloat(cost) }),
-  //     });
-
-  //     if (response.ok) {
-  //       const responseData = await response.json();
-
-  //       if (responseData.newExpense && responseData.newExpense.recommended) {
-  //         const recommendation = responseData.newExpense;
-  //         const replace = window.confirm(
-  //           `Consider replacing ${item} at $${cost} with ${recommendation.item} at $${recommendation.cost}?`
-  //         );
-
-  //         if (replace) {
-  //           setExpenses([...expenses, recommendation]);
-  //           setRemainingSalary(responseData.remainingSalary);
-  //         }
-  //       } else {
-  //         setExpenses([...expenses, responseData.newExpense]);
-  //         setRemainingSalary(responseData.remainingSalary);
-  //       }
-
-  //       setSelectedCategory('');
-  //       setItem('');
-  //       setCost('');
-  //     } else {
-  //       console.error('Failed to add expense');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error:', error);
-  //   }
-  // };
-
-
-
-  const handleAddExpense = async () => {
+const handleAddExpense = async () => {
   try {
     const response = await fetch('http://127.0.0.1:5000/add_expense', {
       method: 'POST',
@@ -158,13 +52,13 @@ const MainForm = () => {
       body: JSON.stringify({ category: selectedCategory, item, cost: parseFloat(cost) }),
     });
     console.log('Request Data:', { category: selectedCategory, item, cost: parseFloat(cost) })
-    console.log('Response:', response); // Add this line
+    console.log('Response:', response); 
 
     if (response.ok) {
       const responseData = await response.json();
-      console.log('Response Data:', responseData); // Add this line
+      console.log('Response Data:', responseData); 
       alert('Category : '+responseData['category']+'\nName : '+responseData['item']+'\nCost : '+responseData['cost'])
-      // Rest of your code
+      
       setLowestExpenses( {
         cost:responseData['cost'],
         item:responseData['item'],
@@ -184,84 +78,7 @@ const MainForm = () => {
   }
 };
 
-
-  // const checkForAlternatives = (newExpense) => {
-  //   const alternative = defaultRecommendations.find(
-  //     (recommendation) =>
-  //       recommendation.category === newExpense.category &&
-  //       recommendation.item.toLowerCase() === newExpense.item.toLowerCase() &&
-  //       recommendation.cost < newExpense.cost
-  //   );
-
-  //   if (alternative) {
-  //     const replace = window.confirm(
-  //       `Consider replacing ${newExpense.item} at $${newExpense.cost} with ${alternative.item} at $${alternative.cost}?`
-  //     );
-
-  //     if (replace) {
-  //       return alternative;
-  //     }
-  //   }
-
-  //   return null;
-  // };
-
-  // useEffect(() => {
-  //   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.cost, 0);
-  //   const remainingSalary = userSalary - totalExpenses;
-
-  //   if (remainingSalary < 0) {
-  //     setExpenses([...expenses, ...defaultRecommendations]);
-  //     setBudgetSummary({ remainingSalary: 0, expenses: [...expenses, ...defaultRecommendations] });
-  //   } else {
-  //     setBudgetSummary({ remainingSalary, expenses });
-  //   }
-  // }, [expenses, userSalary]);
-
-  // const handleAddExpense = () => {
-  //   if (selectedCategory.trim() === '' || item.trim() === '' || isNaN(cost) || cost <= 0) {
-  //     alert('Please enter a valid category, item, and cost.');
-  //     return;
-  //   }
-
-  //   const newExpense = { category: selectedCategory, item, cost: parseFloat(cost) };
-  //   const alternative = checkForAlternatives(newExpense);
-
-  //   if (alternative) {
-  //     setExpenses([...expenses, alternative]);
-  //     const remainingSalary = userSalary - expenses.reduce((sum, expense) => sum + expense.cost, 0) - alternative.cost;
-  //     setBudgetSummary({ remainingSalary, expenses: [...expenses, alternative] });
-  //   } else {
-  //     setExpenses([...expenses, newExpense]);
-  //     const remainingSalary = userSalary - expenses.reduce((sum, expense) => sum + expense.cost, 0) - newExpense.cost;
-  //     setBudgetSummary({ remainingSalary, expenses: [...expenses, newExpense] });
-  //   }
-
-  //   setSelectedCategory('');
-  //   setItem('');
-  //   setCost('');
-  // };
-
-  // const handleEditRecommendation = (index) => {
-  //   const editedExpense = { ...expenses[index] };
-  //   const editedCost = parseFloat(prompt(`Edit cost for ${editedExpense.item}:`, editedExpense.cost));
-
-  //   if (!isNaN(editedCost) && editedCost > 0) {
-  //     editedExpense.cost = editedCost;
-
-  //     const updatedExpenses = [...expenses];
-  //     updatedExpenses[index] = editedExpense;
-
-  //     setExpenses(updatedExpenses);
-
-  //     const remainingSalary = userSalary - updatedExpenses.reduce((sum, expense) => sum + expense.cost, 0);
-  //     setBudgetSummary({ remainingSalary, expenses: updatedExpenses });
-  //   } else {
-  //     alert('Please enter a valid cost.');
-  //   }
-  // };
-
-  const handleLogout = () => {
+const handleLogout = () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('userSalary');
       router.push('/login');
