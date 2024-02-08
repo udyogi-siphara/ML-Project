@@ -1,6 +1,5 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify
 from flask_cors import CORS  # Import the CORS extension
-import pandas as pd
 from pymongo import MongoClient
 from expense_model import find_lowest_price
 
